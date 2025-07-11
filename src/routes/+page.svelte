@@ -16,6 +16,9 @@
     placeholder="Enter stock ticker (e.g., AAPL)"
     class="ticker-input"
   />
+  <p class="disclosure">
+    This is an experimental tool and does not provide financial advice or guaranteed accurate information.
+  </p>
 </div>
 
 <style>
@@ -55,6 +58,15 @@
   .ticker-input:focus {
     border-color: #3182ce;
     box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.5);
+  }
+
+  .disclosure {
+    font-family: 'PT Serif', serif;
+    font-size: 0.875rem;
+    color: #a0aec0;
+    text-align: center;
+    margin-top: 1rem;
+    max-width: 20rem;
   }
 
   :global(html, body) {
