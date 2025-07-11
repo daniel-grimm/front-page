@@ -1,80 +1,89 @@
-<svelte:head>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-</svelte:head>
-
 <script>
-  let ticker = '';
+	let ticker = '';
 </script>
 
+<svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link
+		href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap"
+		rel="stylesheet"
+	/>
+</svelte:head>
+
 <div class="container">
-  <h1>Stock Ticker Lookup</h1>
-  <input
-    type="text"
-    bind:value={ticker}
-    placeholder="Enter stock ticker (e.g., AAPL)"
-    class="ticker-input"
-  />
-  <p class="disclosure">
-    This is an experimental tool and does not provide financial advice or guaranteed accurate information.
-  </p>
+	<h1>Stock Ticker Lookup</h1>
+	<input
+		type="text"
+		bind:value={ticker}
+		placeholder="Enter stock ticker (e.g., FXAIX)"
+		class="ticker-input"
+	/>
+	<p class="disclosure">
+		This is an experimental tool and does not provide financial advice or guaranteed accurate
+		information.
+	</p>
 </div>
 
 <style>
-  .container {
-    min-height: 100vh;
-    background-color: #1a202c;
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    box-sizing: border-box;
-    font-family: 'PT Serif', serif;
-  }
+	.container {
+		min-height: 100vh;
+		background-color: #1a3c34;
+		color: #ffffff;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		box-sizing: border-box;
+		font-family: 'PT Serif', serif;
+	}
 
-  h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    font-family: 'PT Serif', serif;
-  }
+	h1 {
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 1.5rem;
+		font-family: 'PT Serif', serif;
+	}
 
-  .ticker-input {
-    background-color: #2d3748;
-    border: 1px solid #4a5568;
-    color: #ffffff;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    width: 100%;
-    max-width: 20rem;
-    outline: none;
-    font-family: 'PT Serif', serif;
-    font-size: 1rem;
-  }
+	.ticker-input {
+		background-color: #2e4d47;
+		border: 1px solid #4a5568;
+		color: #ffffff;
+		padding: 0.75rem;
+		border-radius: 0.5rem;
+		width: 100%;
+		max-width: 20rem;
+		outline: none;
+		font-family: 'PT Serif', serif;
+		font-size: 1rem;
+	}
 
-  .ticker-input:focus {
-    border-color: #3182ce;
-    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.5);
-  }
+	.ticker-input::placeholder {
+		color: #e2e8f0; /* Lighter off-white for better contrast */
+		opacity: 1; /* Ensures full visibility */
+	}
 
-  .disclosure {
-    font-family: 'PT Serif', serif;
-    font-size: 0.875rem;
-    color: #a0aec0;
-    text-align: center;
-    margin-top: 1rem;
-    max-width: 20rem;
-  }
+	.ticker-input:focus {
+		border-color: #3182ce;
+		box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.5);
+	}
 
-  :global(html, body) {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    background-color: #1a202c;
-    font-family: 'PT Serif', serif;
-  }
+	.disclosure {
+		font-family: 'PT Serif', serif;
+		font-size: 0.875rem;
+		color: #a0aec0;
+		text-align: center;
+		margin-top: 1rem;
+		max-width: 20rem;
+	}
+
+	:global(html, body) {
+		margin: 0;
+		padding: 0;
+		height: 100%;
+		width: 100%;
+		background-color: #1a3c34;
+		font-family: 'PT Serif', serif;
+	}
 </style>
