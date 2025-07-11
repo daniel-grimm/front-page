@@ -1,5 +1,77 @@
 <script>
+	import { onMount } from 'svelte';
+	import Chart from 'chart.js/auto';
+
 	let ticker = '';
+	let chart = null;
+	let canvas;
+
+	// Simulated stock data (replace with real API call in production)
+	const getStockData = async (ticker) => {
+		// Mock data for demonstration
+		const mockData = {
+			'FXAIX': [
+				{ date: '2025-01-01', close: 150.23 },
+				{ date: '2025-02-01', close: 152.45 },
+				{ date: '2025-03-01', close: 149.78 },
+				{ date: '2025-04-01', close: 155.12 },
+				{ date: '2025-05-01', close: 157.89 },
+				{ date: '2025-06-01', close: 160.34 }
+			]
+		};
+		return mockData[ticker.toUpperCase()] || [];
+	};
+
+	const updateChart = async () => {
+		const data = await getStockData(ticker);
+		const labels = data.map(item => item.date);
+		const prices = data.map(item => item.close);
+
+		if (chart) {
+			chart.destroy();
+		}
+
+		if (data.length > 0 && canvas) {
+			chart = new Chart(canvas, {
+				type: 'line',
+				data: {
+					labels: labels,
+					datasets: [{
+						label: `${ticker.toUpperCase()} Closing Price`,
+						data: prices,
+						borderColor: '#3182ce',
+						backgroundColor: 'rgba(49, 130, 206, 0.2)',
+						fill: true,
+						tension: 0.4
+					}]
+				},
+				options: {
+					responsive: true,
+					scales: {
+						x: {
+							title: { display: true, text: 'Date', color: '#ffffff' },
+							ticks: { color: '#ffffff' }
+						},
+						y: {
+							title: { display: true, text: 'Price (USD)', color: '#ffffff' },
+							ticks: { color: '#ffffff' }
+						}
+					},
+					plugins: {
+						legend: { labels: { color: '#ffffff' } }
+					}
+				}
+			});
+		}
+	};
+
+	$: ticker, updateChart();
+
+	onMount(() => {
+		return () => {
+			if (chart) chart.destroy();
+		};
+	});
 </script>
 
 <svelte:head>
@@ -9,6 +81,7 @@
 		href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap"
 		rel="stylesheet"
 	/>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </svelte:head>
 
 <div class="container">
@@ -19,6 +92,9 @@
 		placeholder="Enter stock ticker (e.g., FXAIX)"
 		class="ticker-input"
 	/>
+	<div class="chart-container">
+		<canvas bind:this={canvas}></canvas>
+	</div>
 	<p class="disclosure">
 		This is an experimental tool and does not provide financial advice or guaranteed accurate
 		information.
@@ -60,13 +136,19 @@
 	}
 
 	.ticker-input::placeholder {
-		color: #e2e8f0; /* Lighter off-white for better contrast */
-		opacity: 1; /* Ensures full visibility */
+		color: #e2e8f0;
+		opacity: 1;
 	}
 
 	.ticker-input:focus {
 		border-color: #3182ce;
 		box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.5);
+	}
+
+	.chart-container {
+		width: 100%;
+		max-width: 40rem;
+		margin: 1.5rem 0;
 	}
 
 	.disclosure {
@@ -85,5 +167,11 @@
 		width: 100%;
 		background-color: #1a3c34;
 		font-family: 'PT Serif', serif;
+	}
+
+	:global(canvas) {
+		background-color: #2e4d47;
+		border-radius: 0.5rem;
+		padding: 1rem;
 	}
 </style>
