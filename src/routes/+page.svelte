@@ -3,14 +3,32 @@
 	import Chart from 'chart.js/auto';
 
 	let ticker = '';
+	/**
+	 * @type {Chart<"line", any, unknown> | null}
+	 */
 	let chart = null;
+	/**
+	 * @type {import("chart.js").ChartItem}
+	 */
 	let canvas;
 
-	// Simulated stock data (replace with real API call in production)
-	const getStockData = async (ticker) => {
-		// Mock data for demonstration
+	/**
+	 * @typedef {Object} StockDataPoint
+	 * @property {string} date - The date of the stock data point
+	 * @property {number} close - The closing price of the stock
+	 */
+
+	/**
+	 * Fetches stock data for a given ticker symbol
+	 * @param {string} ticker - The stock ticker symbol
+	 * @returns {Promise<StockDataPoint[]>} An array of stock data points
+	 */
+	const getStockData = async (/** @type {string} */ ticker) => {
+		/**
+		 * @type {{ [key: string]: StockDataPoint[] }}
+		 */
 		const mockData = {
-			'FXAIX': [
+			FXAIX: [
 				{ date: '2025-01-01', close: 150.23 },
 				{ date: '2025-02-01', close: 152.45 },
 				{ date: '2025-03-01', close: 149.78 },
@@ -24,8 +42,8 @@
 
 	const updateChart = async () => {
 		const data = await getStockData(ticker);
-		const labels = data.map(item => item.date);
-		const prices = data.map(item => item.close);
+		const labels = data.map((/** @type {{ date: any; }} */ item) => item.date);
+		const prices = data.map((/** @type {{ close: any; }} */ item) => item.close);
 
 		if (chart) {
 			chart.destroy();
@@ -36,14 +54,16 @@
 				type: 'line',
 				data: {
 					labels: labels,
-					datasets: [{
-						label: `${ticker.toUpperCase()} Closing Price`,
-						data: prices,
-						borderColor: '#3182ce',
-						backgroundColor: 'rgba(49, 130, 206, 0.2)',
-						fill: true,
-						tension: 0.4
-					}]
+					datasets: [
+						{
+							label: `${ticker.toUpperCase()} Closing Price`,
+							data: prices,
+							borderColor: '#3182ce',
+							backgroundColor: 'rgba(49, 130, 206, 0.2)',
+							fill: true,
+							tension: 0.4
+						}
+					]
 				},
 				options: {
 					responsive: true,
@@ -65,7 +85,7 @@
 		}
 	};
 
-	$: ticker, updateChart();
+	$: (ticker, updateChart());
 
 	onMount(() => {
 		return () => {
