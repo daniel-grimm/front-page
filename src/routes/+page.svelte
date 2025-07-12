@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
 
-	let ticker = '';
+	let ticker = 'AAPL'; // Default to AAPL (supported symbol)
+	let error = '';
 	/**
 	 * @type {Chart<"line", any, unknown> | null}
 	 */
@@ -13,37 +14,46 @@
 	let canvas;
 
 	/**
-	 * @typedef {Object} StockDataPoint
-	 * @property {string} date - The date of the stock data point
-	 * @property {number} close - The closing price of the stock
-	 */
-
-	/**
-	 * Fetches stock data for a given ticker symbol
+	 * Fetches stock data for a given ticker symbol from Finnhub
 	 * @param {string} ticker - The stock ticker symbol
 	 * @returns {Promise<StockDataPoint[]>} An array of stock data points
 	 */
-	const getStockData = async (/** @type {string} */ ticker) => {
-		/**
-		 * @type {{ [key: string]: StockDataPoint[] }}
-		 */
-		const mockData = {
-			FXAIX: [
-				{ date: '2025-01-01', close: 150.23 },
-				{ date: '2025-02-01', close: 152.45 },
-				{ date: '2025-03-01', close: 149.78 },
-				{ date: '2025-04-01', close: 155.12 },
-				{ date: '2025-05-01', close: 157.89 },
-				{ date: '2025-06-01', close: 160.34 }
-			]
-		};
-		return mockData[ticker.toUpperCase()] || [];
+	const getStockData = async (ticker) => {
+		try {
+			const now = Math.floor(Date.now() / 1000);
+			const startOfDay = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+			const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
+			const url = `https://finnhub.io/api/v1/stock/candle?symbol=${ticker.toUpperCase()}&resolution=1&from=${startOfDay}&to=${now}&token=${apiKey}`;
+
+			const response = await fetch(url);
+			if (!response.ok) {
+				if (response.status === 403) {
+					throw new Error('Access denied: Invalid API key or insufficient permissions.');
+				}
+				throw new Error(`API request failed: ${response.statusText}`);
+			}
+
+			const data = await response.json();
+			if (data.s === 'no_data') {
+				throw new Error(`No data available for ${ticker}.`);
+			}
+
+			return data.t.map((/** @type {number} */ timestamp, /** @type {string | number} */ index) => ({
+				date: new Date(timestamp * 1000).toLocaleTimeString(),
+				close: data.c[index]
+			}));
+		} catch (/** @type {{ error: unknown; }} */ error) {
+			console.error('Error fetching stock data:', error.message);
+			error = error.message; // Set error for display
+			return [];
+		}
 	};
 
 	const updateChart = async () => {
+		error = ''; // Reset error
 		const data = await getStockData(ticker);
-		const labels = data.map((/** @type {{ date: any; }} */ item) => item.date);
-		const prices = data.map((/** @type {{ close: any; }} */ item) => item.close);
+		const labels = data.map((item) => item.date);
+		const prices = data.map((item) => item.close);
 
 		if (chart) {
 			chart.destroy();
@@ -69,7 +79,7 @@
 					responsive: true,
 					scales: {
 						x: {
-							title: { display: true, text: 'Date', color: '#ffffff' },
+							title: { display: true, text: 'Time', color: '#ffffff' },
 							ticks: { color: '#ffffff' }
 						},
 						y: {
@@ -85,13 +95,15 @@
 		}
 	};
 
-	$: (ticker, updateChart());
-
 	onMount(() => {
 		return () => {
 			if (chart) chart.destroy();
 		};
 	});
+
+	const handleSubmit = async () => {
+		await updateChart();
+	};
 </script>
 
 <svelte:head>
@@ -106,12 +118,18 @@
 
 <div class="container">
 	<h1>Stock Ticker Lookup</h1>
-	<input
-		type="text"
-		bind:value={ticker}
-		placeholder="Enter stock ticker (e.g., FXAIX)"
-		class="ticker-input"
-	/>
+	<div class="input-container">
+		<input
+			type="text"
+			bind:value={ticker}
+			placeholder="Enter stock ticker (e.g., AAPL)"
+			class="ticker-input"
+		/>
+		<button on:click={handleSubmit} class="submit-button">Submit</button>
+	</div>
+	{#if error}
+		<p class="error">{error}</p>
+	{/if}
 	<div class="chart-container">
 		<canvas bind:this={canvas}></canvas>
 	</div>
@@ -142,6 +160,13 @@
 		font-family: 'PT Serif', serif;
 	}
 
+	.input-container {
+		display: flex;
+		gap: 0.5rem;
+		width: 100%;
+		max-width: 20rem;
+	}
+
 	.ticker-input {
 		background-color: #2e4d47;
 		border: 1px solid #4a5568;
@@ -149,10 +174,24 @@
 		padding: 0.75rem;
 		border-radius: 0.5rem;
 		width: 100%;
-		max-width: 20rem;
 		outline: none;
 		font-family: 'PT Serif', serif;
 		font-size: 1rem;
+	}
+
+	.submit-button {
+		background-color: #3182ce;
+		color: #ffffff;
+		border: none;
+		padding: 0.75rem 1.5rem;
+		border-radius: 0.5rem;
+		font-family: 'PT Serif', serif;
+		font-size: 1rem;
+		cursor: pointer;
+	}
+
+	.submit-button:hover {
+		background-color: #2b6cb0;
 	}
 
 	.ticker-input::placeholder {
@@ -178,6 +217,14 @@
 		text-align: center;
 		margin-top: 1rem;
 		max-width: 20rem;
+	}
+
+	.error {
+		color: #ff4d4d;
+		font-family: 'PT Serif', serif;
+		font-size: 0.875rem;
+		text-align: center;
+		margin-top: 0.5rem;
 	}
 
 	:global(html, body) {
